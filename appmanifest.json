@@ -1,0 +1,10 @@
+{
+	"name": "Chat PCC2",
+	"short_name": "Chat PCC2",
+	"description": "PC Creator Chat",
+	"start_url": "index.html",
+	"display": "fullscreen",
+	"orientation": "any",
+	"background_color": "#ffffff",
+	"icons": []
+}
