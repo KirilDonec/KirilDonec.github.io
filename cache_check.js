@@ -1,52 +1,29 @@
-const CACHE_NAME = 'my-site-cache-v1';
-const urlsToCache = [
-  '/',
-  '/styles/main.css',
-  '/script/main.js',
-  '/index.html',
-  '/images/'
-];
+const cacheName = 'myCache';
 
-self.addEventListener('install', function(event) {
-  // Perform install steps
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(function(cache) {
-        console.log('Opened cache');
-        return cache.addAll(urlsToCache);
-      })
-  );
+// проверка наличия кэша
+if ('caches' in window) {
+  caches.match('/').then(function(response) {
+    if (response) {
+      console.log('Cache hit!');
+      // получение содержимого из кэша
+      response.text().then(function(text) {
+        console.log(text);
+      });
+    } else {
+      console.log('Cache miss!');
+    }
+  });
+}
+
+// загрузка ресурсов и сохранение их в кэш
+fetch('/').then(function(response) {
+  return caches.open(cacheName).then(function(cache) {
+    console.log('Caching files...');
+    cache.put('/', response.clone());
+    return response;
+  });
+}).then(function(response) {
+  console.log('Cache update complete!');
+  alert('Обновление кэша загружено!');
 });
 
-self.addEventListener('fetch', function(event) {
-  event.respondWith(
-    caches.match(event.request)
-      .then(function(response) {
-        // Cache hit - return response
-        if (response) {
-          return response;
-        }
-
-        // Clone the request to make a fetch
-        const fetchRequest = event.request.clone();
-
-        return fetch(fetchRequest)
-          .then(function(response) {
-            // Check if we received a valid response
-            if(!response || response.status !== 200 || response.type !== 'basic') {
-              return response;
-            }
-
-            // Clone the response to store it in the cache
-            const responseToCache = response.clone();
-
-            caches.open(CACHE_NAME)
-              .then(function(cache) {
-                cache.put(event.request, responseToCache);
-              });
-
-            return response;
-          });
-      })
-    );
-});
